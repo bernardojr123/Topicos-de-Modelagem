@@ -27,5 +27,5 @@ tel
 
 node twotasks(up1,down1,up2,down2,c1,c2: bool) returns (estado:string ; power:int)
 let
-    a1 = inlined radiator(up1,down1,up2,down2,c1,c2);
+    estador,power = inlined radiator(up1,down1,up2,down2,c1,c2);
 tel
