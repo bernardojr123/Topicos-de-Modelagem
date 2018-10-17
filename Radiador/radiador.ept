@@ -3,33 +3,29 @@
     unless => transiciona para outro estado e executa o novo estado
 *)
 
-node radiator(up1,down1,up2,down2,c1,c2: bool) returns (string state, int power)
+node radiator(up1,down1,up2,down2,c1,c2: bool) returns ( estado:string ; power:int)
 let
     automaton
      state OFF do
-        state = "off"
-        power = 0 
+        estado = "off" & power = 0
      unless up1 or not c1 then Frost_protection
      state Frost_protection do
-        state = "frost protection"
-        power = 300
+        estado = "frost protection" & power = 300
      unless up1 & c1 then Eco
         | up2 & c2 then High
      state Eco do
-        state = "eco"
-        power = 1500
+        estado = "eco" & power = 1500
      unless down1 or not c1 then Frost_protection
         | up2 & c2 then High
+        | down1 or not c1 then OFF
      state High do
-        state = "high"
-        power = 2000
+        estado = "high" & power = 2000
      unless down1 or not c1 then Eco
         | down2 or not c2 then Frost_protection
     end 
 tel
 
-(*node twotasks(r1,e1,r2,e2: bool) returns (a1,a2: bool)
+node twotasks(up1,down1,up2,down2,c1,c2: bool) returns (estado:string ; power:int)
 let
-    a1 = inlined radiator(r1,c1,e1);
-    a2 = inlined radiator(r2,c2,e2)
-tel*)
+    a1 = inlined radiator(up1,down1,up2,down2,c1,c2);
+tel
