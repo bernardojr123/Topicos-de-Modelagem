@@ -3,29 +3,84 @@
     unless => transiciona para outro estado e executa o novo estado
 *)
 
+
+(*  Regra2: for security, close window and door when room isn't ocupied
+    Regra3: for energy, if window or door is open, the radiator is either off or in frost protection level
+*)
+
 node radiator(up1,down1,up2,down2,c1,c2: bool) returns ( estado:string ; power:int)
 let
     automaton
-     state OFF do
-        estado = "off" & power = 0
-     unless up1 or not c1 then Frost_protection
-     state Frost_protection do
-        estado = "frost protection" & power = 300
-     unless up1 & c1 then Eco
-        | up2 & c2 then High
-     state Eco do
-        estado = "eco" & power = 1500
-     unless down1 or not c1 then Frost_protection
-        | up2 & c2 then High
-        | down1 or not c1 then OFF
-     state High do
-        estado = "high" & power = 2000
-     unless down1 or not c1 then Eco
-        | down2 or not c2 then Frost_protection
+        state OFF do
+            estado = "off";
+            power = 0
+        unless up1 or not c1 then Frost_protection
+        state Frost_protection do
+            estado = "frost protection";
+            power = 300;
+        unless up1 & c1 then Eco
+            | up2 & c2 then High
+        state Eco do
+            estado = "eco";
+            power = 1500;
+        unless down1 or not c1 then Frost_protection
+            | up2 & c2 then High
+            | down1 or not c1 then OFF
+        state High do
+            estado = "high";
+            power = 2000;
+        unless down1 or not c1 then Eco
+            | down2 or not c2 then Frost_protection
     end 
 tel
 
-node twotasks(up1,down1,up2,down2,c1,c2: bool) returns (estado:string ; power:int)
+node door(push_d,c_door:bool) returns (door_open:bool)
 let
-    estador,power = inlined radiator(up1,down1,up2,down2,c1,c2);
+    automaton
+        state Closed do
+            door_open = false;
+        unless push_d & c_door then Open
+        state Open do
+            door_open = true;
+        unless push_d or not c_door then Closed
+    end
 tel
+
+node window(push_w,c_window:bool) returns (window_open:bool)
+let
+    automaton
+        state Closed do
+            window_open = false;
+        unless push_w & c_window then Open
+        state Open do
+            window_open = true;
+        unless push_w or not c_window then Closed
+    end
+tel
+
+node room(presence:bool) returns (room_oc:bool)
+let
+    automaton
+        state Empty do
+            room_oc = false;
+        unless presence then Ocupied
+        state Ocupied do
+            room_oc = true;
+        unless not presence then Empty
+    end
+tel
+
+node twotasks(push_d1,c_door1,push_w1,c_window1,presence1,up11,down11,up21,down21,c11,c21: bool) returns (window_open1,door_open1,room_oc1:bool ; estado1:string ; power1:int) 
+    contract
+        enforce not (a1 & a2)
+        with (c2, c1:bool)
+let
+    (estado1,power1) = inlined radiator(up11,down11,up21,down21,c11,c21);
+    room_oc1 = inlined room(presence1);
+    window_open1 = inlined window(push_w1,c_window1);
+    door_open1 = inlined door(push_d1,c_door1);
+tel
+
+(*  Regra2: for security, close window and door when room isn't ocupied
+    Regra3: for energy, if window or door is open, the radiator is either off or in frost protection level
+*)
