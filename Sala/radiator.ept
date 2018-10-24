@@ -62,7 +62,7 @@ tel
 
 node twotasks(up1, down1, up2, down2, push_d, push_w, presence: bool) returns (power,estado: int ; door_open, window_open, room_oc:bool)
     contract
-        enforce (not room_oc or (c_window & c_door)) & (not (window_open or door_open) or (estado = 1 or estado = 1))
+        enforce (not room_oc or (c_window & c_door)) & (not (window_open or door_open) or (estado = 1 or estado = 2))
         with (c1,c2,c_door,c_window:bool)
 let
     (power,estado) = inlined radiador(up1, down1, up2, down2, c1, c2);
