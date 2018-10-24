@@ -60,10 +60,15 @@ let
     end
 tel
 
-node twotasks(up1, down1, up2, down2, push_d, push_w, presence: bool) returns (power,estado: int ; door_open, window_open, room_oc:bool)
+node twotask(up1, down1, up2, down2, push_d, push_w, presence: bool) returns (power,estado: int ; door_open, window_open, room_oc:bool)
     contract
-        enforce (not room_oc or (c_window & c_door)) & (not (window_open or door_open) or (estado = 1 or estado = 2))
-        with (c1,c2,c_door,c_window:bool)
+        var rule2, rule3: bool;
+        let 
+            rule2 = room_oc or not (window_open or door_open);
+            rule3 = not (window_open or door_open) or (estado = 1 or estado = 2);
+        tel
+        enforce rule2 & rule3
+        with (c_door,c_window,c1,c2:bool)
 let
     (power,estado) = inlined radiador(up1, down1, up2, down2, c1, c2);
     door_open = inlined door(push_d,c_door);
