@@ -1,0 +1,72 @@
+node radiador(up1, down1, up2, down2, c1, c2: bool) returns (power,estado: int)
+let
+    automaton
+        state OFF do
+            estado = 1;
+            power = 0;
+        unless up1 or not c1 then Frost_protection
+        state Frost_protection do
+            estado = 2;
+            power = 300;
+        unless up1 & c1 then Eco
+            | down1 or not c1 then OFF
+            | up2 & c2 then High
+        state Eco do
+            estado = 3;
+            power = 1500;
+        unless down1 or not c1 then Frost_protection
+            | up2 & c2 then High
+        state High do
+            estado = 4;
+            power = 2000;
+        unless down1 or not c1 then Eco
+            | down2 or not c2 then Frost_protection
+    end
+tel
+
+node door(push_d,c_door:bool) returns (door_open:bool)
+let
+    automaton
+        state Closed do
+            door_open = false;
+        unless push_d & c_door then Open
+        state Open do
+            door_open = true;
+        unless push_d or not c_door then Closed
+    end
+tel
+
+node window(push_w,c_window:bool) returns (window_open:bool)
+let
+    automaton
+        state Closed do
+            window_open = false;
+        unless push_w & c_window then Open
+        state Open do
+            window_open = true;
+        unless push_w or not c_window then Closed
+    end
+tel
+
+node room(presence:bool) returns (room_oc:bool)
+let
+    automaton
+        state Empty do
+            room_oc = false;
+        unless presence then Occupied
+        state Occupied do
+            room_oc = true;
+        unless not presence then Empty
+    end
+tel
+
+node twotasks(up1, down1, up2, down2, push_d, push_w, presence: bool) returns (power,estado: int ; door_open, window_open, room_oc:bool)
+    contract
+        enforce (not room_oc or (c_window & c_door)) & (not (window_open or door_open) or (estado = 1 or estado = 1))
+        with (c1,c2,c_door,c_window:bool)
+let
+    (power,estado) = inlined radiador(up1, down1, up2, down2, c1, c2);
+    door_open = inlined door(push_d,c_door);
+    window_open = inlined window(push_w,c_window);
+    room_oc = inlined room(presence);
+tel

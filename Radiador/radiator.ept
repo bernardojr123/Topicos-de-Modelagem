@@ -1,35 +1,30 @@
-(*
-    until => executa o estado em que está e transiciona para outro estado
-    unless => transiciona para outro estado e executa o novo estado
-    *)
-     
-node radiator(up1,down1,up2,down2,c1,c2: bool) returns ( estado:string ; power:int)
+node radiador(up1, down1, up2, down2, c1, c2: bool) returns (power,estado: int)
 let
     automaton
         state OFF do
-            estado = "off";
+            estado = 1;
             power = 0;
         unless up1 or not c1 then Frost_protection
         state Frost_protection do
-            estado = "frost protection";
+            estado = 2;
             power = 300;
         unless up1 & c1 then Eco
             | down1 or not c1 then OFF
             | up2 & c2 then High
         state Eco do
-            estado = "eco";
+            estado = 3;
             power = 1500;
         unless down1 or not c1 then Frost_protection
             | up2 & c2 then High
         state High do
-            estado = "high";
+            estado = 4;
             power = 2000;
         unless down1 or not c1 then Eco
             | down2 or not c2 then Frost_protection
     end
 tel
-     
-node twotasks(up1,down1,up2,down2,c1,c2: bool) returns (estado1:string ; power1:int)
+
+node twotask(up1, down1, up2, down2, c1, c2: bool) returns (power,estado: int)
 let
-    (estado1,power1) = inlined radiator(up1,down1,up2,down2,c1,c2);
+    (power,estado) = inlined radiador(up1, down1, up2, down2, c1, c2);
 tel
