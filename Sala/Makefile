@@ -57,10 +57,10 @@ $(CONTRACT_PROG)_c/_main.c: $(CONTRACT_PROG)_z3z/$(CONTRACT_NODE).z3z
 	$(HEPTC) $<
 
 $(CTRLR_PROG).ept: $(CONTRACT_PROG)_z3z/$(CONTRACT_NODE).z3z
-#	$(SIGALI) < $(CONTRACT_PROG)_z3z/$(CONTRACT_NODE).z3z > /dev/null
+	$(SIGALI) < $(CONTRACT_PROG)_z3z/$(CONTRACT_NODE).z3z > /dev/null
 
 $(CTRLR_PROG).epci $(CTRLR_PROG)_c/$(CTRLR_PROG).c: $(CTRLR_PROG).ept
-#	$(HEPTC) -target c $(CTRLR_PROG).ept
+	$(HEPTC) -target c $(CTRLR_PROG).ept
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
