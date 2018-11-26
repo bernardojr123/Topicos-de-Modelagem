@@ -1,0 +1,106 @@
+node enlace(status: bool) returns (estado:int)
+let
+    automaton
+
+        state OFF do
+            estado = 0;
+        unless not status then ON
+
+        state ON do
+            estado = 1;
+        unless status then OFF
+
+    end
+tel
+
+node protocolos(nota_http, nota_smtp, nota_ftp: int) returns (estado, melhor_valor:int)
+let
+    automaton
+
+        state HTTP do
+            estado = 0;
+            melhor_valor = nota_http;
+        unless nota_ftp >= nota_http then FTP
+            | nota_smtp >= nota_http then SMTP
+
+        state FTP do
+            estado = 1;
+            melhor_valor = nota_ftp;
+        unless nota_http >= nota_ftp then HTTP
+            | nota_smtp >= nota_ftp then SMTP
+
+        state SMTP do
+            estado = 2;
+            melhor_valor = nota_smtp;
+        unless nota_ftp >= nota_smtp then FTP
+            | nota_http >= nota_smtp then SMTP
+
+    end
+tel 
+
+node decisor(c1, c2, c3: bool) returns (estado: int)
+let
+    automaton
+
+        state ETHERNET do
+            estado = 0;
+        unless c1 then TresG
+            | c3 then WIFI
+        
+        state TresG do
+            estado = 1;
+        unless c2 then ETHERNET
+            | c3 then WIFI
+
+        state WIFI do
+            estado = 2;
+        unless c1 then TresG
+            | c2 then ETHERNET
+
+    end
+tel
+
+
+node controlador_multihomed(status_3g, status_wf, status_eth: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth: int) returns (estado_3g, prot_3g, valor_3g, estado_wf, prot_wf, valor_wf, estado_eth, prot_eth, valor_eth, melhor_enlace: int)
+    contract
+        var regra, melhor_3g, melhor_eth, melhor_wf: bool;
+        melhor_3g = (estado_3g & ((valor_3g >= valor_wf) & (valor_3g >= valor_eth)));
+        melhor_eth = (estado_eth & ((valor_eth >= valor_wf) & (valor_eth >= valor_3g)));
+        melhor_wf = (estado_wf & ((valor_wf >= valor_3g) & (valor_wf >= valor_eth)));
+        let
+        switch s | melhor_3g do regra = c1;
+                | melhor_eth do regra = c2;
+                | melhor_wf do regra = c3;
+        end
+        tel
+        enforce regra
+            with(c1, c2, c3: bool)
+let
+    estado_3g = enlace(status_3g);
+    (prot_3g, valor_3g) = protocolos(nota_http3g, nota_smtp3g, nota_ftp3g);
+    estado_wf = enlace(status_wf);
+    (prot_wf, valor_wf) = protocolos(nota_httpwf, nota_smtpwf, nota_ftpwf);
+    estado_eth = enlace(status_eth);
+    (prot_eth, valor_eth) = protocolos(nota_httpeth, nota_smtpeth, nota_ftpeth);
+    melhor_enlace = decisor(c1, c2, c3);
+tel
+
+(* 
+contract
+        var 
+            rule1, rule2, rule3, rule4, regra5: bool;
+        total: int;
+        let
+        rule1 = not room_oc or (lamp_on or tv_on);
+        rule2 = room_oc or not (window_open or door_open);
+        rule3 = not (window_open or door_open) or (nameRad = 0 or nameRad = 1);
+        rule4 = room_oc or (not(lamp_on or tv_on) & (powerRad = 0 or powerRad = 300));
+        total = powerOven + powerRad + powerWash;
+        switch s | S1 do regra5 = (total <= 3000)
+                    | S2 do regra5 = (total <= 5000)
+                    | S3 do regra5 = (total <= 7000);
+        end 
+        tel
+        enforce rule1 & rule2 & rule3 & rule4 & regra5
+            with (c_door, c_window, c1, c2, c_wash, c_oven, contLamp1, contLamp2, contTV1, contTV2: bool) 
+*)
