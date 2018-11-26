@@ -68,8 +68,8 @@ node controlador_multihomed(status_3g, status_wf, status_eth: bool; nota_http3g,
         melhor_eth = ((estado_eth = 1) & ((valor_eth >= valor_wf) & (valor_eth >= valor_3g)));
         melhor_wf = ((estado_wf = 1) & ((valor_wf >= valor_3g) & (valor_wf >= valor_eth)));
         let
-        switch s | melhor_3g do regra = (melhor_enlace = 1);
-                | melhor_eth do regra = (melhor_enlace = 0);
+        switch s | melhor_eth do regra = (melhor_enlace = 0);
+                | melhor_3g do regra = (melhor_enlace = 1);
                 | melhor_wf do regra = (melhor_enlace = 2);
         end
         tel
