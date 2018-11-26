@@ -64,9 +64,9 @@ tel
 node controlador_multihomed(status_3g, status_wf, status_eth: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth: int) returns (estado_3g, prot_3g, valor_3g, estado_wf, prot_wf, valor_wf, estado_eth, prot_eth, valor_eth, melhor_enlace: int)
     contract
         var regra, melhor_3g, melhor_eth, melhor_wf: bool;
-        melhor_3g = (estado_3g & ((valor_3g >= valor_wf) & (valor_3g >= valor_eth)));
-        melhor_eth = (estado_eth & ((valor_eth >= valor_wf) & (valor_eth >= valor_3g)));
-        melhor_wf = (estado_wf & ((valor_wf >= valor_3g) & (valor_wf >= valor_eth)));
+        melhor_3g = ((estado_3g = 1) & ((valor_3g >= valor_wf) & (valor_3g >= valor_eth)));
+        melhor_eth = ((estado_eth = 1) & ((valor_eth >= valor_wf) & (valor_eth >= valor_3g)));
+        melhor_wf = ((estado_wf = 1) & ((valor_wf >= valor_3g) & (valor_wf >= valor_eth)));
         let
         switch s | melhor_3g do regra = (melhor_enlace = 1);
                 | melhor_eth do regra = (melhor_enlace = 0);
