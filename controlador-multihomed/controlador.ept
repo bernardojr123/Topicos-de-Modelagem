@@ -36,7 +36,7 @@ let
             | nota_http >= nota_smtp then SMTP
 
     end
-tel 
+tel
 
 node decisor(c1, c2, c3: bool) returns (estado: int)
 let
@@ -46,7 +46,7 @@ let
             estado = 0;
         unless c1 then TresG
             | c3 then WIFI
-        
+
         state TresG do
             estado = 1;
         unless c2 then ETHERNET
@@ -68,9 +68,9 @@ node controlador_multihomed(status_3g, status_wf, status_eth: bool; nota_http3g,
         melhor_eth = (estado_eth & ((valor_eth >= valor_wf) & (valor_eth >= valor_3g)));
         melhor_wf = (estado_wf & ((valor_wf >= valor_3g) & (valor_wf >= valor_eth)));
         let
-        switch s | melhor_3g do regra = c1;
-                | melhor_eth do regra = c2;
-                | melhor_wf do regra = c3;
+        switch s | melhor_3g do regra = (melhor_enlace = 1);
+                | melhor_eth do regra = (melhor_enlace = 0);
+                | melhor_wf do regra = (melhor_enlace = 2);
         end
         tel
         enforce regra
@@ -85,9 +85,9 @@ let
     melhor_enlace = decisor(c1, c2, c3);
 tel
 
-(* 
+(*
 contract
-        var 
+        var
             rule1, rule2, rule3, rule4, regra5: bool;
         total: int;
         let
@@ -99,8 +99,8 @@ contract
         switch s | S1 do regra5 = (total <= 3000)
                     | S2 do regra5 = (total <= 5000)
                     | S3 do regra5 = (total <= 7000);
-        end 
+        end
         tel
         enforce rule1 & rule2 & rule3 & rule4 & regra5
-            with (c_door, c_window, c1, c2, c_wash, c_oven, contLamp1, contLamp2, contTV1, contTV2: bool) 
+            with (c_door, c_window, c1, c2, c_wash, c_oven, contLamp1, contLamp2, contTV1, contTV2: bool)
 *)
