@@ -72,13 +72,7 @@ node controlador_multihomed(status_3g, status_wf, status_eth: bool; nota_http3g,
             
             if melhor_3g = true
             then regra = (melhor_enlace = 1)
-            else melhor_3g = false
-            end
-        tel
-        let
-            if melhor_wf = true
-            then regra = (melhor_enlace = 2)
-            else melhor_wf = false
+            else regra = (melhor_enlace = 2)
             end
         tel
         enforce regra
