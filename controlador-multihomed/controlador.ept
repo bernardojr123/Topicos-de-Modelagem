@@ -1,3 +1,6 @@
+type protocolo = HTTP | SMTP | FTP
+type enlace = TRESG | ETH | WIFI
+
 node enlace(status: bool) returns (estado:int)
 let
     automaton
@@ -13,24 +16,24 @@ let
     end
 tel
 
-node protocolos(nota_http, nota_smtp, nota_ftp: int) returns (estado, melhor_valor:int)
+node protocolos(nota_http, nota_smtp, nota_ftp: int) returns (estado: protocolo; melhor_valor:int)
 let
     automaton
 
         state HTTP do
-            estado = 0;
+            estado = HTTP;
             melhor_valor = nota_http;
         unless nota_ftp >= nota_http then FTP
             | nota_smtp >= nota_http then SMTP
 
         state FTP do
-            estado = 1;
+            estado = FTP;
             melhor_valor = nota_ftp;
         unless nota_http >= nota_ftp then HTTP
             | nota_smtp >= nota_ftp then SMTP
 
         state SMTP do
-            estado = 2;
+            estado = SMTP;
             melhor_valor = nota_smtp;
         unless nota_ftp >= nota_smtp then FTP
             | nota_http >= nota_smtp then SMTP
@@ -60,8 +63,22 @@ let
     end
 tel
 
+node canal(c: bool) returns(estado: bool)
+let
+    automaton
+    
+        state OFF do
+            estado = false;
+        unless c then ON
+        
+        state ON do
+            estado = true;
+        unless not c then OFF
+        
+    end
+tel
 
-node controlador_multihomed(status_3g, status_wf, status_eth: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth: int) returns (estado_3g, prot_3g, valor_3g, estado_wf, prot_wf, valor_wf, estado_eth, prot_eth, valor_eth, melhor_enlace: int)
+node controlador_multihomed(status_3g, status_wf, status_eth: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth: int) returns (estado_3g, valor_3g, estado_wf, valor_wf, estado_eth, valor_eth, melhor_enlace: int; prot_3g, prot_wf, prot_eth: protocolo)
     contract
         var regra, melhor_3g, melhor_eth, melhor_wf: bool;
         let
@@ -84,7 +101,7 @@ let
     (prot_wf, valor_wf) = protocolos(nota_httpwf, nota_smtpwf, nota_ftpwf);
     estado_eth = enlace(status_eth);
     (prot_eth, valor_eth) = protocolos(nota_httpeth, nota_smtpeth, nota_ftpeth);
-    melhor_enlace = decisor(c1, c2, c3);
+    melhor_enlace, melhor_prot = decisor(estado_3g, prot_3g, valor_3g, estado_eth, prot_eth, valor_eth, estado_wf, prot_wf, valor_wf);
 tel
 
 (*
