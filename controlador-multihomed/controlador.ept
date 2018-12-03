@@ -57,8 +57,8 @@ let
         state PWIFI do
             estado = 3;
             melhor_protocolo = prot_wf;
-        unless ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) then PTresG
-            | ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) then PETHERNET
+        unless ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) then PETHERNET
+            | ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) then PTresG
 
     end
 tel
@@ -93,5 +93,6 @@ let
     http = canal(c4);
     ftp = canal(c5):
     smtp = canal(c6); *)
+    (* A -> B, se a entao b; para cada regra *)
 
 tel
