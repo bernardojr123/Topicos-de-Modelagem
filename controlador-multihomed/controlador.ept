@@ -79,6 +79,36 @@ let
 tel
 
 node controlador_multihomed(status_eth, status_3g, status_wf: bool;  nota_httpeth, nota_ftpeth, nota_smtpeth, nota_http3g, nota_ftp3g, nota_smtp3g, nota_httpwf, nota_ftpwf, nota_smtpwf: int) returns (estado_eth, valor_eth, prot_eth, estado_3g, valor_3g, prot_3g, estado_wf, valor_wf, prot_wf, melhor_prot, melhor_enlace: int)
+    
+    contract
+        var 
+            regra1, regra2, regra3, regra4, regra5, regra6, regra7, regra8, regra9: bool;
+    (* let
+        regra1 = not ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) or
+        regra2 = not ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) or
+        regra3 = not ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) or
+        regra4 = not ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) or
+        regra5 = not ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) or
+        regra6 = not ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) or
+        regra7 = not ((estado_wf = 1) & ((valor_wf <= valor_3g) & (valor_wf <= valor_eth))) or
+        regra8 = not ((estado_wf = 1) & ((valor_wf <= valor_3g) & (valor_wf <= valor_eth))) or
+        regra9 = not ((estado_wf = 1) & ((valor_wf <= valor_3g) & (valor_wf <= valor_eth))) or
+    tel *)
+    let
+        regra1 = not (melhor_enlace = 1 & melhor_prot = 1) or (ether & http);
+        regra2 = not (melhor_enlace = 1 & melhor_prot = 2) or (ether & ftp);
+        regra3 = not (melhor_enlace = 1 & melhor_prot = 3) or (ether & smtp);
+        regra4 = not (melhor_enlace = 2 & melhor_prot = 1) or (tresg & http);
+        regra5 = not (melhor_enlace = 2 & melhor_prot = 2) or (tresg & ftp);
+        regra6 = not (melhor_enlace = 2 & melhor_prot = 3) or (tresg & smtp);
+        regra7 = not (melhor_enlace = 3 & melhor_prot = 1) or (wifi & http);
+        regra8 = not (melhor_enlace = 3 & melhor_prot = 2) or (wifi & ftp);
+        regra9 = not (melhor_enlace = 3 & melhor_prot = 3) or (wifi & smtp);
+    tel
+    enforce regra1 & regra2 & regra3 & regra4 & regra5 & regra6 & regra7 & regra8 & regra9
+            with (c1, c2, c3, c4, c5, c6: bool)
+
+
 let
     estado_3g = enlace(status_3g);
     (prot_3g, valor_3g) = protocolos(nota_http3g, nota_smtp3g, nota_ftp3g);
@@ -87,12 +117,12 @@ let
     estado_eth = enlace(status_eth);
     (prot_eth, valor_eth) = protocolos(nota_httpeth, nota_smtpeth, nota_ftpeth);
     (melhor_enlace, melhor_prot) = decisor(prot_3g, prot_wf, prot_eth, estado_3g, valor_3g, estado_wf, valor_wf, estado_eth, valor_eth);
-  (*   ether = canal(c1);
+    ether = canal(c1);
     tresg = canal(c2);
     wifi = canal(c3);
     http = canal(c4);
-    ftp = canal(c5):
-    smtp = canal(c6); *)
+    ftp = canal(c5);
+    smtp = canal(c6);
     (* A -> B, se a entao b; para cada regra *)
 
 tel
