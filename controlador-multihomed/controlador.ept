@@ -82,16 +82,26 @@ node controlador_multihomed(status_eth, status_3g, status_wf: bool;  nota_httpet
     
     contract
         var 
-            regra1, regra2, regra3, regra4, regra5, regra6: bool;
+            regra1, regra2: bool;
     let
-        regra1 = not (melhor_enlace = 1) or ether;
+        switch melhor_enlace
+            | 1 do regra1 = ether;
+            | 2 do regra1 = tresg;
+            | 3 do regra1 = wifi;
+        end
+        switch melhor_prot
+            | 1 do regra2 = http;
+            | 2 do regra2 = ftp;
+            | 3 do regra2 = smtp;
+        end
+(*         regra1 = not (melhor_enlace = 1) or ether;
         regra2 = not (melhor_enlace = 2) or tresg;
         regra3 = not (melhor_enlace = 3) or wifi;
         regra4 = not (melhor_prot = 1) or http;
         regra5 = not (melhor_prot = 2) or ftp;
-        regra6 = not (melhor_prot = 3) or smtp;
+        regra6 = not (melhor_prot = 3) or smtp; *)
     tel
-    enforce regra1 & regra2 & regra3 & regra4 & regra5 & regra6
+    enforce regra1 & regra2
             with (c1, c2, c3, c4, c5, c6: bool)
 
 
