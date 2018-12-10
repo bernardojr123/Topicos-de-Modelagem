@@ -102,7 +102,13 @@ node controlador_multihomed(status_eth, status_3g, status_wf: bool;  nota_httpet
         regra5 = not (melhor_prot = 2) or ftp;
         regra6 = not (melhor_prot = 3) or smtp;
 (*         regra7 = ether xor tresg xor wifi;
-        regra8 = http xor ftp xor smtp; *) 
+        regra7 = not ((ether and tresg) or (not ether and not tresg));
+        regra71 = not ((tresg and wifi) or (not tresg and not wifi));
+        regra8 = http xor ftp xor smtp; 
+        regra8 = not ((http and ftp) or (not http and not ftp));
+        regra81 = not ((ftp and smtp) or (not ftp and not smtp));
+    *)
+
     tel
 (*     enforce regra1 & regra2 & regra3
             with (c1, c2, c3, c4, c5, c6: bool) *)
