@@ -101,13 +101,6 @@ node controlador_multihomed(status_eth, status_3g, status_wf: bool;  nota_httpet
         regra4 = not (melhor_prot = 1) or http;
         regra5 = not (melhor_prot = 2) or ftp;
         regra6 = not (melhor_prot = 3) or smtp;
-(*         regra7 = ether xor tresg xor wifi;
-        regra7 = not ((ether and tresg) or (not ether and not tresg));
-        regra71 = not ((tresg and wifi) or (not tresg and not wifi));
-        regra8 = http xor ftp xor smtp; 
-        regra8 = not ((http and ftp) or (not http and not ftp));
-        regra81 = not ((ftp and smtp) or (not ftp and not smtp));
-    *)
 
     tel
 (*     enforce regra1 & regra2 & regra3
@@ -131,3 +124,17 @@ let
     ftp = canal(c5);
     smtp = canal(c6);
 tel
+
+
+(*         regra7 = ether xor tresg xor wifi;
+        ((¬(a ∨ b) ∧ ((a ∨ c) ∧ (b ∨ c))) ∨ (((a ∨ b) ∧ (¬(a ∨ c) ∧ (b ∨ c))) ∨ ((a ∨ b) ∧ ((a ∨ c) ∧ ¬(b ∨ c)))))
+        a = ether or tresg;
+        b = tresg or wifi;
+        c = ether or wifi;
+        regrax = ((not a) and b and c) or (a and not b and c) or (a and b and not c)
+        regra7 = not ((ether and tresg) or (not ether and not tresg));
+        regra71 = not ((tresg and wifi) or (not tresg and not wifi));
+        regra8 = http xor ftp xor smtp; 
+        regra8 = not ((http and ftp) or (not http and not ftp));
+        regra81 = not ((ftp and smtp) or (not ftp and not smtp));
+    *)
