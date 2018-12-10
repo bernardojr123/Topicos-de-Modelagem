@@ -126,7 +126,9 @@ let
 tel
 
 
-(*         regra7 = ether xor tresg xor wifi;
+(*      http://web.stanford.edu/class/cs103/tools/truth-table-tool/
+        (~(a\/b)/\(a\/c)/\(b\/c)) \/ (a\/b)/\~(a\/c)/\(b\/c) \/ (a\/b)/\(a\/c)/\~(b\/c)   
+        regra7 = ether xor tresg xor wifi;
         ((¬(a ∨ b) ∧ ((a ∨ c) ∧ (b ∨ c))) ∨ (((a ∨ b) ∧ (¬(a ∨ c) ∧ (b ∨ c))) ∨ ((a ∨ b) ∧ ((a ∨ c) ∧ ¬(b ∨ c)))))
         a = ether or tresg;
         b = tresg or wifi;
