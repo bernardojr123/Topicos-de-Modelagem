@@ -1,19 +1,25 @@
-node enlace(status: bool) returns (estado:int)
+node enlace(c, status: bool) returns (estado:int)
 let
     automaton
 
         state OFF do
-            estado = 0;
+            estado = 1;
         unless status then ON
 
         state ON do
-            estado = 1;
+            estado = 2;
         unless not status then OFF
+            | c then SEND
+
+        state SEND do
+            estado = 3;
+        unless not status then OFF
+            | not c then ON
 
     end
 tel
 
-node protocolos(nota_http, nota_smtp, nota_ftp: int) returns (estado, melhor_valor:int)
+node protocolos(nota_http, nota_smtp, nota_ftp:int) returns (estado, melhor_valor:int)
 let
     automaton
 
@@ -38,131 +44,83 @@ let
     end
 tel
 
-(* node decisor(prot_3g, prot_wf, prot_eth, estado_3g, valor_3g, estado_wf, valor_wf, estado_eth, valor_eth:int) returns (estado: int; melhor_protocolo: int)
+node escolha_protocolo(prot_3g, prot_wf, prot_eth, valor_3g, valor_wf, valor_eth:int) returns (melhor_prot:int)
 let
     automaton
 
-        state PETHERNET do
-            estado = 1;
-            melhor_protocolo = prot_eth;
-        unless ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) then PTresG
-            | ((estado_wf = 1) & ((valor_wf <= valor_3g) & (valor_wf <= valor_eth))) then PWIFI
+        state HTTP do
+            melhor_prot = 1;
+        unless ((prot_wf = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then FTP
+            | (prot_3g = 2 & (valor_3g <= valor_wf) & (valor_3g <= valor_eth)) then FTP
+            | (prot_eth = 2 & (valor_eth <= valor_wf) & (valor_eth <= valor_3g)) then FTP
+            | ((prot_wf = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then SMTP
+            | ((prot_3g = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then SMTP
+            | ((prot_eth = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then SMTP
 
-        state PTresG do
-            estado = 2;
-            melhor_protocolo = prot_3g;
-        unless ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) then PETHERNET
-            | ((estado_wf = 1) & ((valor_wf <= valor_3g) & (valor_wf <= valor_eth))) then PWIFI
+        state FTP do
+            melhor_prot = 2;
+        unless ((prot_wf = 1) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then HTTP
+            | (prot_3g = 1 & (valor_3g <= valor_wf) & (valor_3g <= valor_eth)) then HTTP
+            | (prot_eth = 1 & (valor_eth <= valor_wf) & (valor_eth <= valor_3g)) then HTTP
+            | ((prot_wf = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then SMTP
+            | ((prot_3g = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then SMTP
+            | ((prot_eth = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then SMTP
 
-        state PWIFI do
-            estado = 3;
-            melhor_protocolo = prot_wf;
-        unless ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) then PETHERNET
-            | ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) then PTresG
+        state SMTP do
+            melhor_prot = 3;
+        unless ((prot_wf = 1) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then HTTP
+            | (prot_3g = 1 & (valor_3g <= valor_wf) & (valor_3g <= valor_eth)) then HTTP
+            | (prot_eth = 1 & (valor_eth <= valor_wf) & (valor_eth <= valor_3g)) then HTTP
+            | ((prot_wf = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then FTP
+            | ((prot_3g = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then FTP
+            | ((prot_eth = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then FTP
 
-    end
-tel *)
-
-(* node escolha_protocolo(prot_3g, prot_wf, prot_eth, valor_3g, valor_wf, valor_eth:int) returns (estado: int; melhor_protocolo: int)
-let
-    automaton
-
-        state PHTTP do
-            estado = 1;
-        unless ((prot_wf = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PFTP
-            | (prot_3g = 2 & (valor_3g <= valor_wf) & (valor_3g <= valor_eth)) then PFTP
-            | (prot_eth = 2 & (valor_eth <= valor_wf) & (valor_eth <= valor_3g)) then PFTP
-            | ((prot_wf = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PSMTP
-            | ((prot_3g = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PSMTP
-            | ((prot_eth = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PSMTP
-
-        state PFTP do
-            estado = 2;
-        unless ((prot_wf = 1) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PHTTP
-            | (prot_3g = 1 & (valor_3g <= valor_wf) & (valor_3g <= valor_eth)) then PHTTP
-            | (prot_eth = 1 & (valor_eth <= valor_wf) & (valor_eth <= valor_3g)) then PHTTP
-            | ((prot_wf = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PSMTP
-            | ((prot_3g = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PSMTP
-            | ((prot_eth = 3) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PSMTP
-
-        state PSMTP do
-            estado = 3;
-        unless ((prot_wf = 1) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PHTTP
-            | (prot_3g = 1 & (valor_3g <= valor_wf) & (valor_3g <= valor_eth)) then PHTTP
-            | (prot_eth = 1 & (valor_eth <= valor_wf) & (valor_eth <= valor_3g)) then PHTTP
-            | ((prot_wf = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PFTP
-            | ((prot_3g = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PFTP
-            | ((prot_eth = 2) & (valor_wf <= valor_3g) & (valor_wf <= valor_eth)) then PFTP
-
-    end
-tel *)
-
-node canal(c: bool) returns(estado: bool)
-let
-    automaton
-    
-        state OFF do
-            estado = false;
-        unless c then ON
-        
-        state ON do
-            estado = true;
-        unless not c then OFF
-        
     end
 tel
 
-(* node controlador_multihomed(status_eth, status_3g, status_wf: bool;  nota_httpeth, nota_ftpeth, nota_smtpeth, nota_http3g, nota_ftp3g, nota_smtp3g, nota_httpwf, nota_ftpwf, nota_smtpwf: int) returns (estado_eth, valor_eth, prot_eth, estado_3g, valor_3g, prot_3g, estado_wf, valor_wf, prot_wf, melhor_prot, melhor_enlace: int; ether, tresg, wifi, http, ftp, smtp: bool) *)
-node controlador_multihomed(status_eth, status_3g, status_wf: bool;  nota_httpeth, nota_ftpeth, nota_smtpeth, nota_http3g, nota_ftp3g, nota_smtp3g, nota_httpwf, nota_ftpwf, nota_smtpwf: int) returns (estado_eth, valor_eth, prot_eth, estado_3g, valor_3g, prot_3g, estado_wf, valor_wf, prot_wf: int; ether, tresg, wifi, http, ftp, smtp: bool)
-    
-(*     contract
-        var 
-            regra3g, regraeth, regrawifi, regrahttp, regraftp, regrasmtp: bool; *)
+node escolha_enlace(valor_3g, valor_wf, valor_eth: int) returns (enlace:int)
+let
+    automaton
+
+        state ETH do
+            enlace = 1;
+        unless ((valor_wf <= valor_3g) & (valor_wf < valor_eth)) then WIFI
+            |  ((valor_3g <= valor_wf) & (valor_3g < valor_eth)) then TresG
+
+        state WIFI do
+            enlace = 2;
+        unless ((valor_eth <= valor_3g) & (valor_eth <= valor_wf)) then ETH
+            |  ((valor_3g <= valor_eth) & (valor_3g < valor_wf)) then TresG
+
+        state TresG do
+            enlace = 2;
+        unless ((valor_eth <= valor_3g) & (valor_eth <= valor_wf)) then ETH
+            |  ((valor_wf <= valor_eth) & (valor_wf < valor_3g)) then WIFI
+
+    end
+tel
+
+
+
+node controlador_multihomed (status_3g, cwf, status_wf, ceth, status_eth:bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, prot_3g, valor_3g, estado_wf, prot_wf, valor_wf, estado_eth, prot_eth, valor_eth, melhor_protocolo, melhor_enlace: int)
     contract
         var 
             regra3g: bool;
     let
-        regra3g = not ((estado_3g = 1) & ((valor_3g <= valor_wf) & (valor_3g <= valor_eth))) or tresg;(* 
-        regraeth = not ((estado_eth = 1) & ((valor_eth <= valor_wf) & (valor_eth <= valor_3g))) or ether;
-        regrawifi = not ((estado_wf = 1) & ((valor_wf <= valor_3g) & (valor_wf <= valor_eth))) or wifi;
-        regrahttp = not ((regra3g & (prot_3g = 1)) or (regraeth & (prot_eth = 1)) or (regrawifi & (prot_wf = 1))) or http;
-        regraftp = not ((regra3g & (prot_3g = 2)) or (regraeth & (prot_eth = 2)) or (regrawifi & (prot_wf = 2))) or ftp;
-        regrasmtp = not ((regra3g & (prot_3g = 3)) or (regraeth & (prot_eth = 3)) or (regrawifi & (prot_wf = 3))) or smtp; *)
+        regra3g = not (melhor_enlace = 3) or (estado_3g = 2);
     tel
-    enforce regra3g & regraeth & regrawifi & regrahttp & regraftp & regrasmtp
-            with (c3: bool)
-    (* enforce regra3g & regraeth & regrawifi & regrahttp & regraftp & regrasmtp
-            with (c1, c2, c3, c4, c5, c6: bool)
- *)
+    enforce regra3g
+            with (c3g: bool)
 
 let
-    estado_3g = enlace(status_3g);
+    estado_3g = enlace(c3g, status_3g);
     (prot_3g, valor_3g) = protocolos(nota_http3g, nota_smtp3g, nota_ftp3g);
-    estado_wf = enlace(status_wf);
+    estado_wf = enlace(cwf, status_wf);
     (prot_wf, valor_wf) = protocolos(nota_httpwf, nota_smtpwf, nota_ftpwf);
-    estado_eth = enlace(status_eth);
+    estado_eth = enlace(ceth, status_eth);
     (prot_eth, valor_eth) = protocolos(nota_httpeth, nota_smtpeth, nota_ftpeth);
-(*     (melhor_enlace, melhor_prot) = decisor(prot_3g, prot_wf, prot_eth, estado_3g, valor_3g, estado_wf, valor_wf, estado_eth, valor_eth); *)
-    ether = canal(c1);
-    tresg = canal(c2);
-    wifi = canal(c3);
-    http = canal(c4);
-    ftp = canal(c5);
-    smtp = canal(c6);
+    melhor_protocolo = escolha_protocolo(prot_3g, prot_wf, prot_eth, valor_3g, valor_wf, valor_eth);
+    melhor_enlace = escolha_enlace(valor_3g, valor_wf, valor_eth);
+
 tel
 
-
-(*      http://web.stanford.edu/class/cs103/tools/truth-table-tool/
-        (~(a\/b)/\(a\/c)/\(b\/c)) \/ (a\/b)/\~(a\/c)/\(b\/c) \/ (a\/b)/\(a\/c)/\~(b\/c)   
-        regra7 = ether xor tresg xor wifi;
-        ((¬(a ∨ b) ∧ ((a ∨ c) ∧ (b ∨ c))) ∨ (((a ∨ b) ∧ (¬(a ∨ c) ∧ (b ∨ c))) ∨ ((a ∨ b) ∧ ((a ∨ c) ∧ ¬(b ∨ c)))))
-        a = ether or tresg;
-        b = tresg or wifi;
-        c = ether or wifi;
-        regrax = ((not a) and b and c) or (a and not b and c) or (a and b and not c)
-        regra7 = not ((ether and tresg) or (not ether and not tresg));
-        regra71 = not ((tresg and wifi) or (not tresg and not wifi));
-        regra8 = http xor ftp xor smtp; 
-        regra8 = not ((http and ftp) or (not http and not ftp));
-        regra81 = not ((ftp and smtp) or (not ftp and not smtp));
-    *)
