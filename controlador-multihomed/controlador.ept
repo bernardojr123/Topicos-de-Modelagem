@@ -1,18 +1,19 @@
-node enlace(c, status: bool) returns (estado:int)
+type enl = ON | SEND | OFF
+node enlace(c, status: bool) returns (estado:enl)
 let
     automaton
 
         state OFF do
-            estado = 1;
+            estado = OFF;
         unless status then ON
 
         state ON do
-            estado = 2;
+            estado = ON;
         unless not status then OFF
             | c then SEND
 
         state SEND do
-            estado = 3;
+            estado = SEND;
         unless not status then OFF
             | not c then ON
 
@@ -102,15 +103,15 @@ tel
 
 
 
-node controlador_multihomed (status_3g, cwf, status_wf, ceth, status_eth:bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, prot_3g, valor_3g, estado_wf, prot_wf, valor_wf, estado_eth, prot_eth, valor_eth, melhor_protocolo, melhor_enlace: int)
-    contract
+node controlador_multihomed (c3g, status_3g, cwf, status_wf, ceth, status_eth:bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_wf, estado_eth:enl;prot_3g, valor_3g, prot_wf, valor_wf, prot_eth, valor_eth, melhor_protocolo, melhor_enlace: int)
+(*    contract
         var 
             regra3g: bool;
     let
         regra3g = not (melhor_enlace = 2) or (estado_3g = 2);
     tel
     enforce regra3g
-            with (c3g: bool)
+            with (c3g: bool)*)
 
 let
     estado_3g = enlace(c3g, status_3g);
