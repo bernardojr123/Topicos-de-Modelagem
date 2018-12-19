@@ -107,7 +107,7 @@ node controlador_multihomed (status_3g, cwf, status_wf, ceth, status_eth:bool; n
         var 
             regra3g: bool;
     let
-        regra3g = not (melhor_enlace = 3) or (estado_3g = 2);
+        regra3g = not (melhor_enlace = 2) or (estado_3g = 2);
     tel
     enforce regra3g
             with (c3g: bool)
