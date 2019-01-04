@@ -3,19 +3,19 @@ node enlace(c, status: bool) returns (estado:enl)
 let
     automaton
 
-        state OFF do
+        state STOFF do
             estado = OFF;
-        unless status then ON
+        unless status then STON
 
-        state ON do
+        state STON do
             estado = ON;
-        unless not status then OFF
-            | c then SEND
+        unless not status then STOFF
+            | c then STSEND
 
-        state SEND do
+        state STSEND do
             estado = SEND;
-        unless not status then OFF
-            | not c then ON
+        unless not status then STOFF
+            | not c then STON
 
     end
 tel
