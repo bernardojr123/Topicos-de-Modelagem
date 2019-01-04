@@ -1,0 +1,28 @@
+type enl = ON | SEND | OFF
+node enlace(c, status: bool) returns (estado:enl)
+let
+    automaton
+
+        state OFF do
+            estado = OFF;
+        unless status then ON
+
+        state ON do
+            estado = ON;
+        unless not status then OFF
+            | c then SEND
+
+        state SEND do
+            estado = SEND;
+        unless not status then OFF
+            | not c then ON
+
+    end
+tel
+
+node controlador_multihomed (c3g, status_3g, ceth, status_eth, cwf, status_wf: bool) returns (estado_3g, estado_eth, estado_wf: enl)
+let
+    estado_3g = enlace(c3g, status_3g);
+    estado_eth = enlace(ceth, status_eth);
+    estado_wf = enlace(cwf, status_wf);
+tel
