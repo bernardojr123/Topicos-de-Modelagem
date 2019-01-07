@@ -1,5 +1,5 @@
-type enl = ON | SEND | OFF
-node enlace(c, status: bool) returns (estado:enl)
+type state_enl = ON | SEND | OFF
+node enlace(c, status: bool) returns (estado:state_enl)
 let
     automaton
 
@@ -46,7 +46,18 @@ let
     end
 tel
 
-node controlador_multihomed (c3g, status_3g, ceth, status_eth, cwf, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: enl; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth: int)
+
+
+node controlador_multihomed (c3g, status_3g, ceth, status_eth, cwf, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: state_enl; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth: int)
+    (* contract
+        var 
+            regra3g: bool;
+    let
+        regra3g = not ((valor_3g <= valor_wf) & (valor_3g < valor_eth)) or (estado_3g = SEND);
+    tel
+    enforce regra3g
+            with (c3g: bool) *)
+
 let
     estado_3g = inlined enlace(c3g, status_3g);
     estado_eth = inlined enlace(ceth, status_eth);
