@@ -20,9 +20,38 @@ let
     end
 tel
 
-node controlador_multihomed (c3g, status_3g, ceth, status_eth, cwf, status_wf: bool) returns (estado_3g, estado_eth, estado_wf: enl)
+type prot = HTTP | SMTP | FTP
+node protocolos(nota_http, nota_smtp, nota_ftp:int) returns (estado: prot; melhor_valor:int)
 let
-    estado_3g = enlace(c3g, status_3g);
-    estado_eth = enlace(ceth, status_eth);
-    estado_wf = enlace(cwf, status_wf);
+    automaton
+
+        state STHTTP do
+            estado = HTTP;
+            melhor_valor = nota_http;
+        unless nota_ftp <= nota_http then STFTP
+            | nota_smtp <= nota_http then STSMTP
+
+        state STFTP do
+            estado = FTP;
+            melhor_valor = nota_ftp;
+        unless nota_http <= nota_ftp then STHTTP
+            | nota_smtp <= nota_ftp then STSMTP
+
+        state STSMTP do
+            estado = SMTP;
+            melhor_valor = nota_smtp;
+        unless nota_ftp <= nota_smtp then STFTP
+            | nota_http <= nota_smtp then STHTTP
+
+    end
+tel
+
+node controlador_multihomed (c3g, status_3g, ceth, status_eth, cwf, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: enl; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth: int)
+let
+    estado_3g = inlined enlace(c3g, status_3g);
+    estado_eth = inlined enlace(ceth, status_eth);
+    estado_wf = inlined enlace(cwf, status_wf);
+    (prot_3g, valor_3g) = inlined protocolos(nota_http3g, nota_smtp3g, nota_ftp3g);
+    (prot_wf, valor_wf) = inlined protocolos(nota_httpwf, nota_smtpwf, nota_ftpwf);
+    (prot_eth, valor_eth) = inlined protocolos(nota_httpeth, nota_smtpeth, nota_ftpeth);
 tel
