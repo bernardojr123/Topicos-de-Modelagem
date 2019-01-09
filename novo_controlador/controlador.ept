@@ -1,21 +1,22 @@
 type state_enl = ON | SEND | OFF
-node enlace(c, status: bool) returns (estado:state_enl)
+node enlace(c, status: bool) returns (estado:int)
 let
     automaton
 
         state STOFF do
-            estado = OFF;
-        unless status then STON
+            estado = 0;
+        unless status & c then STSEND
+            | status then STON
 
         state STON do
-            estado = ON;
-        unless not status then STOFF
-            | c then STSEND
+            estado = 1;
+        unless c then STSEND
+            | not status then STOFF
 
         state STSEND do
-            estado = SEND;
-        unless not status then STOFF
-            | not c then STON
+            estado = 2;
+        unless c then STON
+            | not status then STOFF
 
     end
 tel
@@ -69,19 +70,29 @@ let
     end
 tel *)
 
-
-
-node controlador_multihomed (status_3g, ceth, status_eth, cwf, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: state_enl; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth: int;)
+node controlador_multihomed (status_3g, ceth, status_eth, cwf, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: int; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth: int; test: bool;)
     contract
         var 
             regra3g: bool;
-    let
-        regra3g = not ((valor_3g <= valor_eth) & (valor_3g < valor_wf)) or (estado_3g = SEND);
-    tel
-    enforce regra3g
-            with (c3g: bool)
+        let
+            (* if estado_3g = ON
+            then regra3g = not (true) or (estado_3g = SEND)
+            else regra3g = true
+            end *)
+            (* switch last estado_3g 
+                | ON do regra3g = not ((valor_3g <= valor_eth) & (valor_3g < valor_wf)) or (true)
+                | SEND do regra3g = true
+                | OFF do regra3g = true;
+            end *)
+            regra3g = not ((valor_3g <= valor_eth) & (valor_3g < valor_wf) & estado_3g > 0) or (estado_3g = 2);
+        tel
+        enforce regra3g
+                with (c3g: bool)
+(*     var
+         last estado_3g: state_enl = OFF; *)
 
 let
+    test = not ((valor_3g <= valor_eth) & (valor_3g < valor_wf) & estado_3g > 0);
     estado_3g = inlined enlace(c3g, status_3g);
     estado_eth = inlined enlace(ceth, status_eth);
     estado_wf = inlined enlace(cwf, status_wf);
