@@ -29,20 +29,20 @@ let
         state STHTTP do
             estado = HTTP;
             melhor_valor = nota_http;
-        unless nota_ftp <= nota_http then STFTP
+        unless (nota_ftp <= nota_http & nota_ftp <= nota_smtp)then STFTP
             | nota_smtp <= nota_http then STSMTP
 
         state STFTP do
             estado = FTP;
             melhor_valor = nota_ftp;
-        unless nota_http <= nota_ftp then STHTTP
+        unless (nota_http <= nota_ftp & nota_http <= nota_smtp) then STHTTP
             | nota_smtp <= nota_ftp then STSMTP
 
         state STSMTP do
             estado = SMTP;
             melhor_valor = nota_smtp;
-        unless nota_ftp <= nota_smtp then STFTP
-            | nota_http <= nota_smtp then STHTTP
+        unless (nota_http <= nota_smtp & nota_http <= nota_ftp) then STHTTP
+            | nota_ftp <= nota_smtp then STFTP
 
     end
 tel
@@ -52,11 +52,11 @@ node controlador_multihomed (status_3g, status_eth, status_wf: bool; nota_http3g
         var 
             regra3g, regraeth, regrawf: bool;
         let
-            regra3g = not ((valor_3g <= valor_eth) & (valor_3g < valor_wf) & estado_3g > 0) or (estado_3g = 2);
             regraeth = not ((valor_eth <= valor_3g) & (valor_eth <= valor_wf) & estado_eth > 0) or (estado_eth = 2);
             regrawf = not ((valor_wf <= valor_3g) & (valor_wf < valor_eth) & estado_wf > 0) or (estado_wf = 2);
+            regra3g = not ((valor_3g < valor_eth) & (valor_3g < valor_wf) & estado_3g > 0) or (estado_3g = 2);
         tel
-        enforce regra3g
+        enforce regra3g & regraeth & regrawf 
                 with (c3g, ceth, cwf: bool)
 
 
