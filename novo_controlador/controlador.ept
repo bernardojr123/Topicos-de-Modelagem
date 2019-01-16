@@ -1,4 +1,3 @@
-type state_enl = ON | SEND | OFF
 node enlace(c, status: bool) returns (estado:int)
 let
     automaton
@@ -17,6 +16,28 @@ let
             estado = 2;
         unless c then STON
             | not status then STOFF
+
+    end
+tel
+
+node enlace_send(c1,c2:bool) returns (estado:int)
+let
+    automaton
+
+        state ETH do
+            estado = 1;
+        unless c1 then WIFI
+            | c2 then TresG
+
+        state WIFI do
+            estado = 2;
+        unless c1 then ETH
+            | c2 then TresG
+
+        state TresG do      
+            estado = 3;
+        unless c1 then ETH
+            | c2 then WIFI
 
     end
 tel
@@ -47,7 +68,7 @@ let
     end
 tel
 
-node controlador_multihomed (status_3g, status_eth, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: int; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth: int;)
+node controlador_multihomed (status_3g, status_eth, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: int; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth, melhor_enlace: int;)
     contract
         var 
             regra3g, regraeth, regrawf: bool;
@@ -57,7 +78,7 @@ node controlador_multihomed (status_3g, status_eth, status_wf: bool; nota_http3g
             regra3g = not ((valor_3g < valor_eth) & (valor_3g < valor_wf) & estado_3g > 0) or (estado_3g = 2);
         tel
         enforce regra3g & regraeth & regrawf 
-                with (c3g, ceth, cwf: bool)
+                with (c3g, ceth, cwf, c1, c2: bool)
 
 
 let
@@ -67,4 +88,6 @@ let
     (prot_3g, valor_3g) = inlined protocolos(nota_http3g, nota_smtp3g, nota_ftp3g);
     (prot_wf, valor_wf) = inlined protocolos(nota_httpwf, nota_smtpwf, nota_ftpwf);
     (prot_eth, valor_eth) = inlined protocolos(nota_httpeth, nota_smtpeth, nota_ftpeth);
+    melhor_enlace = inlined enlace_send(c1,c2);
+
 tel
