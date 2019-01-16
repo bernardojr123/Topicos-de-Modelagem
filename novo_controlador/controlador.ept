@@ -20,47 +20,25 @@ let
     end
 tel
 
-node enlace_send(c1,c2:bool) returns (estado:int)
-let
-    automaton
 
-        state ETH do
-            estado = 1;
-        unless c1 then WIFI
-            | c2 then TresG
-
-        state WIFI do
-            estado = 2;
-        unless c1 then ETH
-            | c2 then TresG
-
-        state TresG do      
-            estado = 3;
-        unless c1 then ETH
-            | c2 then WIFI
-
-    end
-tel
-
-type prot = HTTP | SMTP | FTP
-node protocolos(nota_http, nota_smtp, nota_ftp:int) returns (estado: prot;melhor_valor:int)
+node protocolos(nota_http, nota_smtp, nota_ftp:int) returns (estado, melhor_valor:int)
 let
     automaton
 
         state STHTTP do
-            estado = HTTP;
+            estado = 10;
             melhor_valor = nota_http;
         unless (nota_ftp <= nota_http & nota_ftp <= nota_smtp)then STFTP
             | nota_smtp <= nota_http then STSMTP
 
         state STFTP do
-            estado = FTP;
+            estado = 20;
             melhor_valor = nota_ftp;
         unless (nota_http <= nota_ftp & nota_http <= nota_smtp) then STHTTP
             | nota_smtp <= nota_ftp then STSMTP
 
         state STSMTP do
-            estado = SMTP;
+            estado = 30;
             melhor_valor = nota_smtp;
         unless (nota_http <= nota_smtp & nota_http <= nota_ftp) then STHTTP
             | nota_ftp <= nota_smtp then STFTP
@@ -68,17 +46,20 @@ let
     end
 tel
 
-node controlador_multihomed (status_3g, status_eth, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: int; prot_3g, prot_wf, prot_eth:prot; valor_3g, valor_wf, valor_eth, melhor_enlace: int;)
+node controlador_multihomed (status_3g, status_eth, status_wf: bool; nota_http3g, nota_smtp3g, nota_ftp3g, nota_httpwf, nota_smtpwf, nota_ftpwf, nota_httpeth, nota_smtpeth, nota_ftpeth:int) returns (estado_3g, estado_eth, estado_wf: int; prot_3g, prot_wf, prot_eth, valor_3g, valor_wf, valor_eth: int;)
     contract
         var 
-            regra3g, regraeth, regrawf: bool;
+            regra3g, regraeth, regrawf, a, b, c: bool;
         let
-            regraeth = not ((valor_eth <= valor_3g) & (valor_eth <= valor_wf) & estado_eth > 0) or (estado_eth = 2);
-            regrawf = not ((valor_wf <= valor_3g) & (valor_wf < valor_eth) & estado_wf > 0) or (estado_wf = 2);
-            regra3g = not ((valor_3g < valor_eth) & (valor_3g < valor_wf) & estado_3g > 0) or (estado_3g = 2);
+            a = ((valor_eth <= valor_3g) & (valor_eth <= valor_wf) & estado_eth > 0);
+            b = ((valor_wf <= valor_3g) & (valor_wf < valor_eth) & estado_wf > 0);
+            c = ((valor_3g < valor_eth) & (valor_3g < valor_wf) & estado_3g > 0);
+            regraeth = not (a & not b & not c ) or (estado_eth = 2 & estado_3g < 2 & estado_wf < 2);
+            regrawf = not (b & not a & not c ) or (estado_wf = 2 & estado_3g < 2 & estado_eth < 2);
+            regra3g = not (c & not a & not b ) or (estado_3g = 2 & estado_eth < 2 & estado_wf < 2);
         tel
         enforce regra3g & regraeth & regrawf 
-                with (c3g, ceth, cwf, c1, c2: bool)
+                with (c3g, ceth, cwf: bool)
 
 
 let
@@ -88,6 +69,5 @@ let
     (prot_3g, valor_3g) = inlined protocolos(nota_http3g, nota_smtp3g, nota_ftp3g);
     (prot_wf, valor_wf) = inlined protocolos(nota_httpwf, nota_smtpwf, nota_ftpwf);
     (prot_eth, valor_eth) = inlined protocolos(nota_httpeth, nota_smtpeth, nota_ftpeth);
-    melhor_enlace = inlined enlace_send(c1,c2);
 
 tel
